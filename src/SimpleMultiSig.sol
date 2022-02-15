@@ -36,13 +36,24 @@ contract SimpleMultiSig {
         require(sender, "sender failed");
     }
 
-    function _findOpt(address sigaddr) private view returns (bool) {
+    function _findOpt(address sigaddr, bool[] memory bops)
+        private
+        view
+        returns (
+            //view
+            bool
+        )
+    {
         for (uint8 i = 0; i < operators.length; i++) {
             //emit log_named_address("operators", operators[i]);
             if (operators[i] != address(0x0)) {
-                if (operators[i] == sigaddr) {
-                    //emit log_named_address("find", operators[i]);
-                    return true;
+                if (bops[i] == false) {
+                    if (operators[i] == sigaddr) {
+                        //emit log_named_address("find", operators[i]);
+                        bops[i] = true;
+                        //emit log("set true");
+                        return true;
+                    }
                 }
             } else {
                 break;
@@ -54,13 +65,14 @@ contract SimpleMultiSig {
     function _checkSigs(
         bytes32 txhash,
         bytes[] memory sigs,
-        uint8 numSigs
+        uint8 numSigs //
     ) private view returns (bool) {
         uint8 c = 0;
         //emit log_named_uint("sigs len", sigs.length);
+        bool[] memory bops = new bool[](operators.length);
         for (uint8 i = 0; i < sigs.length; i++) {
             //emit log_named_bytes("txHash", txHash);
-            if (!_findOpt(txhash.recover(sigs[i]))) {
+            if (!_findOpt(txhash.recover(sigs[i]), bops)) {
                 return false;
             }
             c++;

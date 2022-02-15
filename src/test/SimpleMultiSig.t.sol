@@ -61,4 +61,38 @@ contract SimpleMultiSigTest is DSTest, stdCheats {
         );
         emit log_named_uint("end transfer", address(simpleMultiSig).balance);
     }
+
+    function testTransfer2() public {
+        bytes memory sign1 = getSign(
+            address(0xAC61E605E29a6a58005692d1324d8C3AB5F2c771),
+            1 ether,
+            0x18ef5d5e78aa58a63503bcb48a563de61ffe7665d73ee22b4ab66ef15248be5a
+        );
+        bytes memory sign2 = getSign(
+            address(0xAC61E605E29a6a58005692d1324d8C3AB5F2c771),
+            1 ether,
+            0xae4c0e0111bcdb15e6c5d8873addadcd69b8c8dda3df7ac8c696bd4f02af40fd
+        );
+        bytes memory sign3 = getSign(
+            address(0xAC61E605E29a6a58005692d1324d8C3AB5F2c771),
+            1 ether,
+            0xae4c0e0111bcdb15e6c5d8873addadcd69b8c8dda3df7ac8c696bd4f02af40fd
+        );
+        bytes[] memory sigs = new bytes[](3);
+        sigs[0] = sign1;
+        sigs[1] = sign2;
+        sigs[2] = sign3;
+        emit log("start transfer");
+        try
+            simpleMultiSig.transfer(
+                address(0xAC61E605E29a6a58005692d1324d8C3AB5F2c771),
+                1 ether,
+                sigs
+            )
+        {
+            emit log_named_uint("transfer ok", address(simpleMultiSig).balance);
+        } catch {}
+        assertTrue(address(simpleMultiSig).balance == 5 ether);
+        //emit log_named_uint("end transfer", address(simpleMultiSig).balance);
+    }
 }
